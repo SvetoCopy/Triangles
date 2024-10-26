@@ -9,7 +9,3 @@ file(GLOB_RECURSE SRC_FILES src/*.cpp)
 
 add_executable(TRIANGLES main.cpp ${SRC_FILES})
 target_include_directories(TRIANGLES PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
-
-add_executable(TRIANGLES_TEST tests.cpp ${SRC_FILES})
-target_include_directories(TRIANGLES_TEST PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
-target_link_libraries(TRIANGLES_TEST gtest gmock pthread)

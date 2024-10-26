@@ -40,8 +40,6 @@ int main() {
 
     std::list<int> res = tree.getAllTreeIntersectNum();
 
-    res.unique();
-
     std::cout << res.size() << '\n';
 
     for (auto elem : res) {
