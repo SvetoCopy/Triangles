@@ -22,5 +22,6 @@ public:
     float distanceFromPoint(const Point3D& point);
     IntersectionType IntersecTypeWithTriangle(const Triangle3D& triang);
 
+    bool parallelWith(const Plane& plane) const;
     bool operator==(const Plane& plane) const;
 };

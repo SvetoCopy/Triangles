@@ -14,6 +14,11 @@ Plane::Plane(const Triangle3D triangle) {
     *this = Plane(triangle.v0, triangle.v1, triangle.v2);
 }
 
+bool Plane::parallelWith(const Plane& plane) const {
+    float coeff = plane.norm.vec_end.x / norm.vec_end.x;
+    return (norm * coeff == plane.norm);
+}
+
 bool Plane::operator==(const Plane& plane) const {
     float coeff = std::max(plane.dist / dist, dist / plane.dist);
     

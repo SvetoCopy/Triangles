@@ -5,6 +5,7 @@
 #include "GeomFunctions.h"
 #include <cmath>
 #include "Intervals.h"
+#include "OctTree.h"
 
 TEST(GEOM_TESTs, TriangleDegenerate1) {
     Triangle3D t {Point3D(1, 0, 1), Point3D(1, 0, -1), Point3D(0, 1, 1)};
@@ -213,22 +214,63 @@ TEST(GEOM_TESTs, TriangAndPlaneIntersect5) {
 }
 
 TEST(GEOM_TESTs, IntervalsGeneration1) {
-    Triangle3D tr1 {Point3D(0, -0.5, 0), Point3D(0, 0.5, 0), Point3D(0, 0, 0.5)};
-    Triangle3D tr2 {Point3D(0.25, 0, 0.25), Point3D(-0.25, 0, 0.25), Point3D(0, 0, 1)};
+    Triangle3D triang0 {Point3D(0, -0.5, 0), Point3D(0, 0.5, 0), Point3D(0, 0, 0.5)};
+    Triangle3D triang1 {Point3D(0.25, 0, 0.25), Point3D(-0.25, 0, 0.25), Point3D(0, 0, 1)};
 
-    Plane plane1 {tr1.v0, tr1.v1, tr1.v2};
-    Plane plane2 {tr2.v0, tr2.v1, tr2.v2};
+    Plane triang0_plane {triang0.v0, triang0.v1, triang0.v2};
+    Plane triang1_plane {triang1.v0, triang1.v1, triang1.v2};
 
-    Line3D intersect_line = getPlanesInterLine(plane1, plane2);
-    intersect_line.dist = Vector3D(0,0 ,1);
-    Interval intervals {intersect_line, tr1, tr2};
+    Line3D line = getPlanesInterLine(triang0_plane, triang1_plane);
+    line.dist = Vector3D(0,0 ,1);
 
-    std::cout << intervals.t0_0 << ' ' << intervals.t0_1 << ' ' << intervals.t1_0 << ' ' << intervals.t1_1 << ' ';
+    float v_pr_0_0 = line.dist & Vector3D(triang0.v0 - line.p);
+    float v_pr_0_1 = line.dist & Vector3D(triang0.v1 - line.p);
+    float v_pr_0_2 = line.dist & Vector3D(triang0.v2 - line.p);
 
-    ASSERT_TRUE(intervals.t0_0 == 0);
-    ASSERT_TRUE(intervals.t0_1 == 0.25);
-    ASSERT_TRUE(intervals.t1_0 == 0.25);
-    ASSERT_TRUE(intervals.t1_1 == 1);
+    float v_pr_1_0 = line.dist & Vector3D(triang1.v0 - line.p);
+    float v_pr_1_1 = line.dist & Vector3D(triang1.v1 - line.p);
+    float v_pr_1_2 = line.dist & Vector3D(triang1.v2 - line.p);
+
+    float dist_v_0_0 = triang1_plane.distanceFromPoint(triang0.v0);
+    float dist_v_0_1 = triang1_plane.distanceFromPoint(triang0.v1);
+    float dist_v_0_2 = triang1_plane.distanceFromPoint(triang0.v2);
+
+    float dist_v_1_0 = triang0_plane.distanceFromPoint(triang1.v0);
+    float dist_v_1_1 = triang0_plane.distanceFromPoint(triang1.v1);
+    float dist_v_1_2 = triang0_plane.distanceFromPoint(triang1.v2);
+
+    Interval intervals0 = calculateTriInterval(v_pr_0_0, v_pr_0_1, v_pr_0_2, dist_v_0_0, dist_v_0_1, dist_v_0_2);
+    Interval intervals1 = calculateTriInterval(v_pr_1_0, v_pr_1_1, v_pr_1_2, dist_v_1_0, dist_v_1_1, dist_v_1_2);
+
+    ASSERT_TRUE(intervals0.t0 == 0);
+    ASSERT_TRUE(intervals0.t1 == 0.5);
+
+    ASSERT_TRUE(intervals1.t0 == 0.25);
+    ASSERT_TRUE(intervals1.t1 == 1);
+}
+
+TEST(GEOM_TESTs, IntervalsOverlapping1) {
+
+    Interval interval0 {0, 0.5};
+    Interval interval1 {0.25, 1};
+
+    ASSERT_TRUE(interval0.overlapWith(interval1));
+}
+
+TEST(GEOM_TESTs, IntervalsOverlapping2) {
+
+    Interval interval0 {0.25, 1};
+    Interval interval1 {0, 0.5};
+
+    ASSERT_TRUE(interval0.overlapWith(interval1));
+}
+
+TEST(GEOM_TESTs, IntervalsOverlapping3) {
+
+    Interval interval0 {0.25, 1};
+    Interval interval1 {3, 5};
+
+    ASSERT_FALSE(interval0.overlapWith(interval1));
 }
 
 TEST(GEOM_TESTs, Triangle2DhasPoint2D) {
@@ -240,6 +282,75 @@ TEST(GEOM_TESTs, Triangle2DhasPoint2D) {
     ASSERT_FALSE(tr1.hasPointInside(point2));
 }
 
+TEST(GEOM_TESTs, SmallIntersection)
+{
+    Triangle2D triangle1(Point2D(0, 0), Point2D(5, 0), Point2D(2.5, 5));
+    Triangle2D triangle2(Point2D(2, 2), Point2D(6, 0), Point2D(4, 4));
+
+    ASSERT_TRUE(triangle1.intersectWith(triangle2));
+}
+
+TEST(GEOM_TESTs, NoIntersection1)
+{
+    Triangle2D triangle1(Point2D(0, 0), Point2D(5, 0), Point2D(2.5, 5));
+    Triangle2D triangle2(Point2D(3.5, 3.5), Point2D(6, 0), Point2D(4, 4));
+
+    ASSERT_FALSE(triangle1.intersectWith(triangle2));
+}
+
+TEST(GEOM_TESTs, OneInAnother1)
+{
+    Triangle2D triangle1(Point2D(0, 0), Point2D(5, 0), Point2D(2.5, 5));
+    Triangle2D triangle2(Point2D(2, 2), Point2D(3, 0), Point2D(3, 3));
+
+    ASSERT_TRUE(triangle1.intersectWith(triangle2));
+}
+
+TEST(OctTree, BBcontainsTri)
+{
+    BoundingBox bb {Vector3D(0, -2, 0), Vector3D(0, 2, 2)};
+    Triangle3D tri {Point3D(0, -1, 0), Point3D(0, 1, 0), Point3D(0, 0, 1)};
+    ASSERT_TRUE(bb.contains(tri));
+}
+
+TEST(GEOM_TESTs, PlaneParallels1)
+{
+    Plane plane1 {Vector3D(4, 8, -8), -12};
+    Plane plane2 {Vector3D(2, 4, -4), -6};
+    
+    ASSERT_TRUE(plane1.parallelWith(plane2));
+}
+
+TEST(GEOM_TESTs, PlaneParallels2)
+{
+    Plane plane1 {Vector3D(4, 8, -8), -10};
+    Plane plane2 {Vector3D(2, 4, -4), -6};
+    
+    ASSERT_TRUE(plane1.parallelWith(plane2));
+}
+
+TEST(GEOM_TESTs, PlaneParallels3)
+{
+    Plane plane1 {Vector3D(4, 5, -8), -10};
+    Plane plane2 {Vector3D(2, 4, -4), -6};
+    
+    ASSERT_FALSE(plane1.parallelWith(plane2));
+}
+
+TEST(GENERAL, TriIntersect1) {
+    Triangle3D triang0 {Point3D(0, -0.5, 0), Point3D(0, 0.5, 0), Point3D(0, 0, 0.5)};
+    Triangle3D triang1 {Point3D(0.25, 0, 0.25), Point3D(-0.25, 0, 0.25), Point3D(0, 0, 1)};
+
+    ASSERT_TRUE(triang0.intersectWith(triang1));
+}
+
+/*
+TEST(OctTree, BuildTree) 
+{
+    Triangle3D tri1 {};
+    ASSERT_TRUE(triangle1.intersectWith(triangle2));
+}
+*/
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
