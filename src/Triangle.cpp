@@ -26,7 +26,7 @@ Interval calculateInterval(float v_pr_0, float v_pr_1, float v_pr_2,
     double t0  = v_pr_0 + (v_pr_1 - v_pr_0) * (dist_v_0 / (dist_v_0 - dist_v_1));
     double t1 = v_pr_0 + (v_pr_2 - v_pr_0) * (dist_v_0 / (dist_v_0 - dist_v_2));
 
-    return Interval(t0, t1);
+    return Interval(std::min(t0, t1), std::max(t0, t1));
 }
 
 Interval calculateTriInterval(float v_pr_0, float v_pr_1, float v_pr_2,

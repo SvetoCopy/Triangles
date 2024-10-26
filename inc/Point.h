@@ -7,6 +7,7 @@ public:
     float y; 
     float z; 
 
+    Point3D() {};
     Point3D(float x, float y, float z) : x{x}, y{y}, z{z} {};
 
     Point3D operator+(const Point3D& p)  const;

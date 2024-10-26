@@ -10,7 +10,11 @@ public:
     Point3D v1;
     Point3D v2;
 
+    int id;
+
+    Triangle3D() {};
     Triangle3D(const Point3D& p0, const Point3D& p1, const Point3D& p2) : v0{p0}, v1{p1}, v2{p2} {};
+    Triangle3D(const Point3D& p0, const Point3D& p1, const Point3D& p2, int id) : v0{p0}, v1{p1}, v2{p2}, id{id} {};
     bool isDegenerate() const;
     bool intersectWith(Triangle3D& triang);
     void print();

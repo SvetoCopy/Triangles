@@ -22,10 +22,12 @@ public:
     std::vector<OctTree> childNodes;
     OctTree* parent;
 
+    OctTree() {};
     OctTree(const BoundingBox& region, const std::list<Triangle3D>& region_elems) : region {region}, region_elems{region_elems} {};
     void BuildTree();
 
     OctTree CreateNode(const BoundingBox& region, const std::list<Triangle3D>& objList);
-    size_t getTreeIntersectNum() const;
-    size_t getAllTreeIntersectNum() const;
+
+    std::list<int> getTreeIntersectNum(std::list<Triangle3D> parentObjs) const;
+    std::list<int> getAllTreeIntersectNum() const;
 };

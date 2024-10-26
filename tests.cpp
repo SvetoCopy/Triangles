@@ -337,20 +337,34 @@ TEST(GEOM_TESTs, PlaneParallels3)
     ASSERT_FALSE(plane1.parallelWith(plane2));
 }
 
-TEST(GENERAL, TriIntersect1) {
+TEST(GENERAL, Tri3DIntersect1) {
     Triangle3D triang0 {Point3D(0, -0.5, 0), Point3D(0, 0.5, 0), Point3D(0, 0, 0.5)};
     Triangle3D triang1 {Point3D(0.25, 0, 0.25), Point3D(-0.25, 0, 0.25), Point3D(0, 0, 1)};
 
     ASSERT_TRUE(triang0.intersectWith(triang1));
 }
 
-/*
-TEST(OctTree, BuildTree) 
-{
-    Triangle3D tri1 {};
-    ASSERT_TRUE(triangle1.intersectWith(triangle2));
+TEST(GENERAL, Tri3DIntersect2) {
+    Triangle3D triang0(Point3D{3, 4, 5}, Point3D{5, 6, 7}, Point3D{3, 8, 9});
+    Triangle3D triang1(Point3D{5, 3, 2}, Point3D{2, -2, 1}, Point3D{2, 2, 0});
+
+    ASSERT_FALSE(triang0.intersectWith(triang1));
 }
-*/
+
+TEST(GENERAL, Tri3DIntersect3) {
+    Triangle3D triang0(Point3D{1, 0, 0}, Point3D{0, 1, 0}, Point3D{0, 0, 1});
+    Triangle3D triang1(Point3D{0, 0, 0}, Point3D{1, 1, 1}, Point3D{0, 0, 2});
+
+    ASSERT_TRUE(triang0.intersectWith(triang1));
+}
+
+TEST(GENERAL, Tri3DIntersect4) {
+    Triangle3D triang0(Point3D(5, 4, 3), Point3D(1, 1, 3), Point3D(2, 4, 3));
+    Triangle3D triang1(Point3D(3, 3, 2), Point3D(1, 1, 2), Point3D(1, 1, 0));
+
+    ASSERT_FALSE(triang0.intersectWith(triang1));
+}
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
